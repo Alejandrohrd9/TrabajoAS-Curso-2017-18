@@ -1,0 +1,30 @@
+package FrontController;
+
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.servlet.ServletException;
+import singletonBeans.StatisticsApp;
+
+class UnknownCommand extends FrontCommand {
+
+    @Override
+    public void process() {
+        try {
+            StatisticsApp estadisticas = (StatisticsApp) InitialContext.doLookup("java:global/CarHireEE/CarHireEE-ejb/StatisticsApp!singletonBeans.StatisticsApp");
+            estadisticas.addAccess("UnknownCommand.java");
+            int valueKeyUnk = estadisticas.getValue((String) request.getSession().getAttribute("usuario"));
+            valueKeyUnk++;
+            estadisticas.addUserValue((String) request.getSession().getAttribute("usuario"), valueKeyUnk + 1);
+            try {
+                forward("/unknown.jsp");
+            } catch (ServletException | IOException ex) {
+                Logger.getLogger(UnknownCommand.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } catch (NamingException ex) {
+            Logger.getLogger(UnknownCommand.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+}
